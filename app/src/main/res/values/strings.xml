@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Weather</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_by_name">Search by name</string>
+    <string name="action_by_coordinates">Search by coordinates</string>
+    <string name="toolbar_item_action">Search</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="toolbar_hint_name">City name</string>
+    <string name="toolbar_hint_coords">Coordinates</string>
+</resources>
