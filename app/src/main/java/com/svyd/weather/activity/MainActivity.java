@@ -17,28 +17,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.svyd.weather.API.WeatherApi;
-import com.svyd.weather.API.WeatherSearcherAPI;
 import com.svyd.weather.R;
+import com.svyd.weather.global.Constants;
 import com.svyd.weather.model.WeatherModel;
 import com.svyd.weather.utils.ConvertUtils;
 import com.svyd.weather.utils.ModelUtils;
 import com.svyd.weather.utils.WeatherLoader;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import retrofit.Callback;
-import retrofit.RestAdapter;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<WeatherModel> {
-
-    private final String SAVED_WEATHER_MODEL = "saved_model"; //key to get model from savedInstanceState
-    private final String API = "http://api.openweathermap.org";
-    private final int LOADER_NAME_ID = 1;
-    private final int LOADER_COORDS_ID = 2;
 
     private Toolbar mToolbar;
     private SearchView mSearchView;
@@ -46,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private GoogleMap mMap;
     private WeatherModel mWeatherModel;
     private boolean mByCoords;
-    private WeatherSearcherAPI mWeatherSearcherAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,10 +44,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         initStuff();
         initLoader();
 
-        if (savedInstanceState != null) {
-            mWeatherModel = (WeatherModel) savedInstanceState.getSerializable(SAVED_WEATHER_MODEL);
+        if (savedInstanceState != null ) {
+            mWeatherModel = (WeatherModel) savedInstanceState.getSerializable(Constants.SAVED_WEATHER_MODEL);
             if (mWeatherModel != null) {
                 refreshData(mWeatherModel);
+            } else {
+                mByCoords = true;
             }
         }
     }
@@ -68,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mWeatherModel != null) {
-            outState.putSerializable(SAVED_WEATHER_MODEL, mWeatherModel);
+            outState.putSerializable(Constants.SAVED_WEATHER_MODEL, mWeatherModel);
         }
     }
 
@@ -90,18 +80,18 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         //noinspection SimplifiableIfStatement
         switch (id) {
             case R.id.action_refresh:
-                if (mByCoords) {
+                if (!mByCoords) {
                     item.setTitle(getResources().getString(R.string.action_by_name));
                     mSearchView.setQueryHint(getResources().getString(R.string.toolbar_hint_coords));
                     mSearchView.setQuery("", false);
                     mSearchView.clearFocus();
-                    mByCoords = false;
+                    mByCoords = true;
                 } else {
                     item.setTitle(getResources().getString(R.string.action_by_coordinates));
                     mSearchView.setQueryHint(getResources().getString(R.string.toolbar_hint_name));
                     mSearchView.setQuery("", false);
                     mSearchView.clearFocus();
-                    mByCoords = true;
+                    mByCoords = false;
                 }
                 break;
             case R.id.action_search:
@@ -113,8 +103,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private final void initLoader() {
         Bundle bundle = new Bundle();
-        bundle.putString("args", "Uzhgorod");
-        getLoaderManager().initLoader(LOADER_NAME_ID,
+        bundle.putString(Constants.LOADER_ARGS, Constants.UZHGOROD);
+        getLoaderManager().initLoader(Constants.LOADER_NAME_ID,
                 bundle , this).forceLoad();
     }
 
@@ -126,11 +116,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private final void search() {
         Bundle bundle = new Bundle();
-        bundle.putString("args", mSearchView.getQuery().toString());
+        bundle.putString(Constants.LOADER_ARGS, mSearchView.getQuery().toString());
         if (!mByCoords) {
-            getLoaderManager().restartLoader(LOADER_NAME_ID, bundle, this).forceLoad();
+            getLoaderManager().restartLoader(Constants.LOADER_NAME_ID, bundle, this).forceLoad();
         } else {
-            getLoaderManager().restartLoader(LOADER_COORDS_ID, bundle, this).forceLoad();
+            getLoaderManager().restartLoader(Constants.LOADER_COORDS_ID, bundle, this).forceLoad();
         }
     }
 
@@ -139,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
      */
 
     private final void initStuff() {
-        mWeatherSearcherAPI = new WeatherSearcherAPI();
         mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         mSearchView = (SearchView) mToolbar.findViewById(R.id.search_view);
         mGridView = (GridView) findViewById(R.id.gridView);
@@ -213,58 +202,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
     }
 
-//    /**
-//     * gets the weatherModel using retrofit framework
-//     * @param _request to send on api server
-//     */
-//
-//    private final void getWeatherModel(final String _request) {
-//        try {
-//            mWeatherSearcherAPI.getWeatherApi().getFeed(_request, new Callback<WeatherModel>() {
-//                @Override
-//                public void success(WeatherModel weatherModel, Response response) {
-//                    mWeatherModel = weatherModel;
-//                    refreshData(weatherModel);
-//                }
-//
-//                @Override
-//                public void failure(RetrofitError error) {
-//                    Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        } catch (NullPointerException e) {
-//            e.printStackTrace();
-//            Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//    private final void getWeatherModel(final LatLng _latLng) {
-//
-//        try {
-//            mWeatherSearcherAPI.getWeatherApi().getFeed(_latLng.latitude, _latLng.longitude, new Callback<WeatherModel>() {
-//                @Override
-//                public void success(WeatherModel weatherModel, Response response) {
-//                    mWeatherModel = weatherModel;
-//                    refreshData(weatherModel);
-//                }
-//
-//                @Override
-//                public void failure(RetrofitError error) {
-//                    Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        } catch (NullPointerException e) {
-//            e.printStackTrace();
-//            Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-
     @Override
     public Loader<WeatherModel> onCreateLoader(int id, Bundle args) {
-        if (id == LOADER_NAME_ID) {
-            return new WeatherLoader(getApplicationContext(), args.getString("args"));
+        if (id == Constants.LOADER_NAME_ID) {
+            return new WeatherLoader(getApplicationContext(), args.getString(Constants.LOADER_ARGS));
         } else {
             return new WeatherLoader(getApplicationContext(),
-                    ConvertUtils.getLatLngFromString(args.getString("args")));
+                    ConvertUtils.getLatLngFromString(args.getString(Constants.LOADER_ARGS)));
         }
 
     }

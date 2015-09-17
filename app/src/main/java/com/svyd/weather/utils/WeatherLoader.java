@@ -6,6 +6,7 @@ import android.content.Loader;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.svyd.weather.API.WeatherApi;
+import com.svyd.weather.global.Constants;
 import com.svyd.weather.model.WeatherModel;
 
 import retrofit.RestAdapter;
@@ -14,9 +15,6 @@ import retrofit.RestAdapter;
  * Created by Svyd on 17.09.2015.
  */
 public class WeatherLoader extends AsyncTaskLoader<WeatherModel> {
-
-
-    private final String API = "http://api.openweathermap.org";
 
     private LatLng mCoords;
     private String mCity;
@@ -43,7 +41,7 @@ public class WeatherLoader extends AsyncTaskLoader<WeatherModel> {
 
     private void initApi() {
         mAdapter = new RestAdapter.Builder()
-                .setEndpoint(API).build();
+                .setEndpoint(Constants.API).build();
         mApi = mAdapter.create(WeatherApi.class);
     }
 

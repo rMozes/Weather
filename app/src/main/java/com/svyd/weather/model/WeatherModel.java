@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.svyd.weather.global.Constants;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class WeatherModel implements Serializable {
 
-    private final double KELVIN = - 273.15;
+
 
     @SerializedName("main")
     @Expose
@@ -49,15 +50,15 @@ public class WeatherModel implements Serializable {
 
     public double getTempAvg() {
 
-        return Double.parseDouble(main.tempAvg) + KELVIN;
+        return Double.parseDouble(main.tempAvg) + Constants.KELVIN;
     }
 
     public double getTempMin() {
-        return Double.parseDouble(main.tempMin) + KELVIN;
+        return Double.parseDouble(main.tempMin) + Constants.KELVIN;
     }
 
     public double getTempMax() {
-        return Double.parseDouble(main.tempMax) + KELVIN;
+        return Double.parseDouble(main.tempMax) + Constants.KELVIN;
     }
 
     public String getHumidity() {

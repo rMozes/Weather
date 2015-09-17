@@ -1,5 +1,6 @@
 package com.svyd.weather.utils;
 
+import com.svyd.weather.global.Constants;
 import com.svyd.weather.model.WeatherModel;
 
 import java.util.ArrayList;
@@ -8,31 +9,6 @@ import java.util.ArrayList;
  * Helper class that performs some methods to work with weatherModel
  */
 public class ModelUtils {
-
-    public static String DEGREE = "\u00b0"; //a degree sign
-
-    /**
-     *
-     * @return sample list
-     */
-
-    public static ArrayList<String> getEmptyDataList() {
-        ArrayList<String> list = new ArrayList<>();
-
-        list.add("Avg:");
-        list.add("Max:");
-        list.add("Min:");
-        list.add("Clouds:");
-        list.add("Humidity:");
-        list.add("Pressure:");
-        list.add("Sunrise:");
-        list.add("Sunset:");
-        list.add("Visibility:");
-        list.add("Wind speed:");
-        list.add("Wind degree:");
-
-        return list;
-    }
 
     /**
      * converts @param weatherModel to
@@ -45,9 +21,9 @@ public class ModelUtils {
             try {
                 ArrayList<String> list = new ArrayList<>();
 
-                list.add("Avg: " + String.format("%.2f", _weatherModel.getTempAvg()) + DEGREE);
-                list.add("Max: " + String.format("%.2f", _weatherModel.getTempMax()) + DEGREE);
-                list.add("Min: " + String.format("%.2f", _weatherModel.getTempMin()) + DEGREE);
+                list.add("Avg: " + String.format("%.2f", _weatherModel.getTempAvg()) + Constants.DEGREE);
+                list.add("Max: " + String.format("%.2f", _weatherModel.getTempMax()) + Constants.DEGREE);
+                list.add("Min: " + String.format("%.2f", _weatherModel.getTempMin()) + Constants.DEGREE);
                 list.add(_weatherModel.getShortDesc() + " (" + _weatherModel.getDesc() + ")");
                 list.add("Clouds: " + _weatherModel.getClouds() + "%");
                 list.add("Humidity: " + _weatherModel.getHumidity() + "%");
@@ -61,7 +37,7 @@ public class ModelUtils {
                 }
                 list.add("Wind speed: " + _weatherModel.getWindSpeed() + " m/s");
                 if (_weatherModel.getWindDegree() != null) {
-                    list.add("Wind degree: " + _weatherModel.getWindDegree() + DEGREE);
+                    list.add("Wind degree: " + _weatherModel.getWindDegree() + Constants.DEGREE);
                 } else {
                     list.add("Wind degree: unknown");
                 }
