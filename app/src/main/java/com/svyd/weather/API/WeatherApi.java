@@ -12,9 +12,9 @@ import retrofit.http.Query;
  */
 public interface WeatherApi {
     @GET("/data/2.5/weather")
-    void getFeed(@Query("q") String city, Callback<WeatherModel> response);
+    WeatherModel getFeed(@Query("q") String city);
 
     @GET("/data/2.5/weather")
-    void getFeed(@Query("lat") double lat, @Query("lon") double lon, Callback<WeatherModel> response);
+    WeatherModel getFeed(@Query("lat") double lat, @Query("lon") double lon);
 
 }
