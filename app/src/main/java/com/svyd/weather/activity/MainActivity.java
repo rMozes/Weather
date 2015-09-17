@@ -16,6 +16,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.svyd.weather.API.WeatherApi;
+import com.svyd.weather.API.WeatherSearcherAPI;
 import com.svyd.weather.R;
 import com.svyd.weather.model.WeatherModel;
 import com.svyd.weather.utils.ConvertUtils;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private GoogleMap mMap;
     private WeatherModel mWeatherModel;
     private boolean mByCoords;
+    private WeatherSearcherAPI mWeatherSearcherAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,18 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final void search() {
         if (!mByCoords) {
-            try {
-                String[] city = ConvertUtils.getCityName(this, ConvertUtils.getLatLngFromString(mSearchView.getQuery().toString()));
-                if (city[0] != null) {
-                    getWeatherModel(city[0]);
-                } else {
-                    getWeatherModel(city[1]);
-                }
-            } catch (IOException e) {
-                Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-            } catch (NullPointerException e) {
-                Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-            }
+            getWeatherModel(ConvertUtils.getLatLngFromString(mSearchView.getQuery().toString()));
         } else {
             getWeatherModel(mSearchView.getQuery().toString());
         }
@@ -137,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private final void initStuff() {
+        mWeatherSearcherAPI = new WeatherSearcherAPI();
         mToolbar = (Toolbar) findViewById(R.id.tool_bar);
         mSearchView = (SearchView) mToolbar.findViewById(R.id.search_view);
         mGridView = (GridView) findViewById(R.id.gridView);
@@ -204,12 +196,15 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (_weatherModel != null) {
                 dataToListView(mWeatherModel);
-                LatLng coordinates = ConvertUtils.cityNameToLatLng(this, _weatherModel.getCity());
+                LatLng coordinates = new LatLng(_weatherModel.getLat(), _weatherModel.getLon());
                 mMap.clear();
                 mMap.addMarker(new MarkerOptions().position(coordinates).title(mWeatherModel.getCity() + ", " + mWeatherModel.getCountry())).showInfoWindow();
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(coordinates));
             }
         } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
+        } catch (NullPointerException e) {
             e.printStackTrace();
             Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
         }
@@ -221,22 +216,43 @@ public class MainActivity extends AppCompatActivity {
      */
 
     private final void getWeatherModel(final String _request) {
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(API).build();
+        try {
 
-        final WeatherApi weatherApi = restAdapter.create(WeatherApi.class);
+            mWeatherSearcherAPI.getWeatherApi().getFeed(_request, new Callback<WeatherModel>() {
+                @Override
+                public void success(WeatherModel weatherModel, Response response) {
+                    mWeatherModel = weatherModel;
+                    refreshData(weatherModel);
+                }
 
-        weatherApi.getFeed(_request, new Callback<WeatherModel>() {
-            @Override
-            public void success(WeatherModel weatherModel, Response response) {
-                mWeatherModel = weatherModel;
-                refreshData(weatherModel);
-            }
+                @Override
+                public void failure(RetrofitError error) {
+                    Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private final void getWeatherModel(final LatLng _latLng) {
 
-            @Override
-            public void failure(RetrofitError error) {
-                Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
-            }
-        });
+        try {
+            mWeatherSearcherAPI.getWeatherApi().getFeed(_latLng.latitude, _latLng.longitude, new Callback<WeatherModel>() {
+                @Override
+                public void success(WeatherModel weatherModel, Response response) {
+                    mWeatherModel = weatherModel;
+                    refreshData(weatherModel);
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplication(), "Error, probably bad input", Toast.LENGTH_SHORT).show();
+        }
     }
 }

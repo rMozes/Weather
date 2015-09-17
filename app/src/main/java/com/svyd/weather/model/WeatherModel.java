@@ -40,6 +40,10 @@ public class WeatherModel implements Serializable {
     @Expose
     private List<WeatherDescription> desc;
 
+    @SerializedName("coord")
+    @Expose
+    private Coord coordinates;
+
     @SerializedName("name")
     private String city;
 
@@ -103,5 +107,9 @@ public class WeatherModel implements Serializable {
     public String getCity() {
         return city;
     }
+
+    public Double getLat() {return Double.parseDouble(coordinates.latitude);}
+
+    public Double getLon() {return Double.parseDouble(coordinates.longitude);}
 
 }
